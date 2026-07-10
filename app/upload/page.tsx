@@ -1,5 +1,5 @@
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
+import Navbar from "@/components/landing/Navbar";
+import Footer from "@/components/landing/Footer";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default function UploadPage() {
   return (
     <>
-      <Header />
+      <Navbar />
       <main className="min-h-screen pt-24 pb-16 px-4">
         <div className="mx-auto max-w-2xl">
           {/* En-tête */}

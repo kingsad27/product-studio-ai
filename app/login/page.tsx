@@ -1,7 +1,7 @@
 "use client";
 
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
+import Navbar from "@/components/landing/Navbar";
+import Footer from "@/components/landing/Footer";
 import Link from "next/link";
 import { ROUTES } from "@/constants/routes";
 
@@ -10,7 +10,7 @@ import { ROUTES } from "@/constants/routes";
 export default function LoginPage() {
   return (
     <>
-      <Header />
+      <Navbar />
       <main className="min-h-screen pt-24 pb-16 px-4 gradient-hero">
         <div className="mx-auto max-w-md">
           {/* Card */}

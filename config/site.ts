@@ -30,10 +30,10 @@ export const siteConfig = {
     analytics: false,        // Activé plus tard
   },
   seo: {
-    defaultTitle: "Product Studio AI — Visuels professionnels pour vos produits",
-    titleTemplate: "%s | Product Studio AI",
+    defaultTitle: "ProductStudio — Photos produit professionnelles avec une simple photo téléphone",
+    titleTemplate: "%s | ProductStudio",
     defaultDescription:
-      "Générez des images professionnelles de vos produits avec l'IA. Studio, lifestyle, mannequin — sans écrire un seul prompt.",
+      "Transformez une photo téléphone en photos produit professionnelles prêtes pour votre boutique, vos réseaux sociaux et vos publicités.",
     keywords: [
       "génération image produit",
       "photo produit IA",
