@@ -17,7 +17,7 @@ export default function HeroSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="text-3xl sm:text-4xl lg:text-6xl font-extrabold tracking-tight text-slate-900 mb-3 lg:mb-4 leading-[1.15]"
+              className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900 mb-3 lg:mb-4 leading-[1.15]"
             >
               Transformez une <span className="text-violet-600">simple photo</span> en Shooting professionnel pour <span className="text-violet-600">vendre vos produits</span>
             </motion.h1>
@@ -45,69 +45,72 @@ export default function HeroSection() {
             </motion.div>
           </div>
 
-          {/* Right Column: Visual Collage (Absolute positioning) */}
+          {/* Right Column: 4 Images Grid */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.7, delay: 0.3 }}
-            className="relative w-full max-w-md mx-auto aspect-square lg:aspect-[4/5] mt-8 lg:mt-0"
+            className="w-full max-w-lg mx-auto lg:ml-auto mt-12 lg:mt-0"
           >
-            {/* Image 1: Avant (Haut Gauche) */}
-            <div className="absolute top-0 left-[5%] w-[45%] h-[50%] z-10">
-              <div className="absolute -top-4 -left-6 bg-fuchsia-600 text-white font-bold px-6 py-2 rounded-full shadow-lg text-sm z-20">
-                Avant
+            <div className="grid grid-cols-2 gap-4 sm:gap-6">
+              
+              {/* Image 1: Avant */}
+              <div className="flex flex-col items-center sm:items-start">
+                <div className="bg-fuchsia-600 text-white font-bold px-5 py-1.5 rounded-full shadow-md text-sm mb-3 z-10">
+                  Avant
+                </div>
+                <div className="w-full aspect-[4/5] rounded-[2rem] overflow-hidden shadow-xl border border-slate-100 bg-white">
+                  <img 
+                    src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=400&auto=format&fit=crop" 
+                    alt="Avant" 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
               </div>
-              <div className="w-full h-full rounded-[2rem] overflow-hidden shadow-xl border border-slate-100 bg-white">
-                <img 
-                  src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=400&auto=format&fit=crop" 
-                  alt="Avant" 
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            </div>
 
-            {/* Image 2: Après (Haut Droite) */}
-            <div className="absolute top-[10%] right-[2%] w-[42%] h-[42%] z-20">
-              <div className="absolute top-6 -right-6 bg-green-500 text-white font-bold px-6 py-2 rounded-full shadow-lg text-sm z-20">
-                Après
+              {/* Image 2: Après */}
+              <div className="flex flex-col items-center sm:items-start lg:mt-8">
+                <div className="bg-green-500 text-white font-bold px-5 py-1.5 rounded-full shadow-md text-sm mb-3 z-10">
+                  Après
+                </div>
+                <div className="w-full aspect-square rounded-[2rem] overflow-hidden shadow-xl border border-slate-100 bg-white">
+                  <img 
+                    src="https://images.unsplash.com/photo-1519058082700-08a0b56da9b4?q=80&w=400&auto=format&fit=crop" 
+                    alt="Après 1" 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
               </div>
-              <div className="w-full h-full rounded-[2rem] overflow-hidden shadow-xl border border-slate-100 bg-white">
-                <img 
-                  src="https://images.unsplash.com/photo-1519058082700-08a0b56da9b4?q=80&w=400&auto=format&fit=crop" 
-                  alt="Après 1" 
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            </div>
 
-            {/* Image 3: Après (Bas Gauche) */}
-            <div className="absolute bottom-[5%] left-[8%] w-[42%] h-[42%] z-30">
-              <div className="absolute top-6 -left-6 bg-green-500 text-white font-bold px-6 py-2 rounded-full shadow-lg text-sm z-20">
-                Après
+              {/* Image 3: Après */}
+              <div className="flex flex-col items-center sm:items-start">
+                <div className="bg-green-500 text-white font-bold px-5 py-1.5 rounded-full shadow-md text-sm mb-3 z-10">
+                  Après
+                </div>
+                <div className="w-full aspect-square rounded-[2rem] overflow-hidden shadow-xl border border-slate-100 bg-white">
+                  <img 
+                    src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=400&auto=format&fit=crop" 
+                    alt="Après 2" 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
               </div>
-              <div className="w-full h-full rounded-[2rem] overflow-hidden shadow-xl border border-slate-100 bg-white">
-                <img 
-                  src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=400&auto=format&fit=crop" 
-                  alt="Après 2" 
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            </div>
 
-            {/* Image 4: Après (Bas Droite) */}
-            <div className="absolute bottom-0 right-[5%] w-[45%] h-[48%] z-10">
-              <div className="absolute -top-4 right-4 bg-green-500 text-white font-bold px-6 py-2 rounded-full shadow-lg text-sm z-20">
-                Après
+              {/* Image 4: Après */}
+              <div className="flex flex-col items-center sm:items-start lg:mt-8">
+                <div className="bg-green-500 text-white font-bold px-5 py-1.5 rounded-full shadow-md text-sm mb-3 z-10">
+                  Après
+                </div>
+                <div className="w-full aspect-[4/5] rounded-[2rem] overflow-hidden shadow-xl border border-slate-100 bg-white">
+                  <img 
+                    src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=400&auto=format&fit=crop" 
+                    alt="Après 3" 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
               </div>
-              <div className="w-full h-full rounded-[2rem] overflow-hidden shadow-xl border border-slate-100 bg-white">
-                <img 
-                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=400&auto=format&fit=crop" 
-                  alt="Après 3" 
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            </div>
 
+            </div>
           </motion.div>
 
         </div>
