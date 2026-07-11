@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { SignInButton, SignUpButton, UserButton, useAuth } from "@clerk/nextjs";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Sparkles } from "lucide-react";
 import { ROUTES } from "@/constants/routes";
@@ -9,6 +10,7 @@ import { ROUTES } from "@/constants/routes";
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { isLoaded, isSignedIn } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -56,16 +58,31 @@ export default function Navbar() {
 
           {/* Actions */}
           <div className="hidden md:flex items-center gap-4">
-            <Link href={ROUTES.LOGIN} className="text-sm font-semibold text-slate-700 hover:text-violet-600 transition-colors">
-              Connexion
-            </Link>
-            <Link
-              href={ROUTES.UPLOAD}
-              className="inline-flex items-center gap-2 rounded-full bg-violet-600 px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-violet-200 hover:bg-violet-700 hover:-translate-y-0.5 transition-all"
-            >
-              <Sparkles size={16} />
-              Essayez maintenant
-            </Link>
+            {(!isLoaded || !isSignedIn) ? (
+              <>
+                <SignInButton mode="modal">
+                  <button className="text-sm font-semibold text-slate-700 hover:text-violet-600 transition-colors">
+                    Connexion
+                  </button>
+                </SignInButton>
+                <SignUpButton mode="modal">
+                  <button className="inline-flex items-center gap-2 rounded-full bg-violet-600 px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-violet-200 hover:bg-violet-700 hover:-translate-y-0.5 transition-all">
+                    <Sparkles size={16} />
+                    Essayez maintenant
+                  </button>
+                </SignUpButton>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/dashboard"
+                  className="text-sm font-semibold text-slate-700 hover:text-violet-600 transition-colors"
+                >
+                  Mon Espace
+                </Link>
+                <UserButton afterSignOutUrl="/" />
+              </>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -92,14 +109,25 @@ export default function Navbar() {
             <Link href="#tarifs" onClick={() => setMobileMenuOpen(false)} className="block p-2 text-base font-medium text-slate-700">Tarifs</Link>
             <Link href="#faq" onClick={() => setMobileMenuOpen(false)} className="block p-2 text-base font-medium text-slate-700">FAQ</Link>
             <hr className="border-slate-100" />
-            <Link href={ROUTES.LOGIN} className="block p-2 text-base font-medium text-slate-700">Connexion</Link>
-            <Link
-              href={ROUTES.UPLOAD}
-              onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center justify-center gap-2 rounded-xl bg-violet-600 px-4 py-3 text-base font-bold text-white shadow-md"
-            >
-              Essayez maintenant
-            </Link>
+            {(!isLoaded || !isSignedIn) ? (
+              <>
+                <SignInButton mode="modal">
+                  <button className="block w-full text-left p-2 text-base font-medium text-slate-700">Connexion</button>
+                </SignInButton>
+                <SignUpButton mode="modal">
+                  <button className="flex w-full items-center justify-center gap-2 rounded-xl bg-violet-600 px-4 py-3 text-base font-bold text-white shadow-md">
+                    Essayez maintenant
+                  </button>
+                </SignUpButton>
+              </>
+            ) : (
+              <>
+                <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)} className="block p-2 text-base font-medium text-slate-700">Mon Espace</Link>
+                <div className="p-2">
+                  <UserButton afterSignOutUrl="/" />
+                </div>
+              </>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

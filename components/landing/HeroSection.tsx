@@ -2,10 +2,13 @@
 
 import React from "react";
 import Link from "next/link";
+import { SignUpButton, useAuth } from "@clerk/nextjs";
 import { motion } from "framer-motion";
 import { ROUTES } from "@/constants/routes";
 
 export default function HeroSection() {
+  const { isLoaded, isSignedIn } = useAuth();
+
   return (
     <section className="relative pt-16 pb-12 lg:pt-24 lg:pb-16 overflow-hidden bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -36,12 +39,20 @@ export default function HeroSection() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
             >
-              <Link
-                href={ROUTES.UPLOAD}
-                className="inline-flex items-center justify-center rounded-full bg-violet-600 px-8 py-3 lg:px-12 lg:py-4 text-lg lg:text-xl font-bold text-white shadow-lg hover:bg-violet-700 transition-all"
-              >
-                Essayez
-              </Link>
+              {(!isLoaded || !isSignedIn) ? (
+                <SignUpButton mode="modal">
+                  <button className="inline-flex items-center justify-center rounded-full bg-violet-600 px-8 py-3 lg:px-12 lg:py-4 text-lg lg:text-xl font-bold text-white shadow-lg hover:bg-violet-700 transition-all">
+                    Essayez
+                  </button>
+                </SignUpButton>
+              ) : (
+                <Link
+                  href="/dashboard"
+                  className="inline-flex items-center justify-center rounded-full bg-slate-900 px-8 py-3 lg:px-12 lg:py-4 text-lg lg:text-xl font-bold text-white shadow-lg hover:bg-slate-800 transition-all"
+                >
+                  Accéder à l'application
+                </Link>
+              )}
             </motion.div>
           </div>
 

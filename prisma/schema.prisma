@@ -1,0 +1,155 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL") // Requis pour Supabase avec pooling
+}
+
+// ============================================================
+// USER — Profil lié à l'identité Clerk
+// ============================================================
+model User {
+  id        String   @id              // = Clerk User ID (ex: user_2abc...)
+  email     String   @unique
+  credits   Int      @default(1)      // 1 crédit gratuit à l'inscription
+  currency  String   @default("XOF") // Devise détectée par IP
+  country   String?                   // Code ISO pays (ex: SN, FR, US)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  projects  Project[]
+  purchases Purchase[]
+  promoCodes PromoCodeUsage[]
+
+  @@map("users")
+}
+
+// ============================================================
+// PROJECT — Une session de génération (1 crédit = 1 projet)
+// ============================================================
+model Project {
+  id                 String        @id @default(cuid())
+  userId             String
+  user               User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Fichiers d'entrée (photos téléphone, max 3)
+  inputImageUrls     String[]      // URLs Supabase Storage
+  inputImageCount    Int           @default(1)
+
+  // Résultats générés (5 photos pro)
+  outputImageUrls    String[]      // URLs Supabase Storage
+  outputImageCount   Int           @default(0)
+
+  // Contexte IA
+  aiPrompt           String?       // Prompt envoyé à l'IA
+  aiModel            String?       // Modèle utilisé (ex: flux-1.1-pro)
+
+  // Gestion des retouches (1 gratuite par session)
+  regenerationsUsed  Int           @default(0)
+  regenerationsMax   Int           @default(1)
+
+  status             ProjectStatus @default(PENDING)
+  errorMessage       String?
+  creditsUsed        Int           @default(1)
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  @@index([userId])
+  @@map("projects")
+}
+
+enum ProjectStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+// ============================================================
+// PURCHASE — Historique des achats de crédits
+// ============================================================
+model Purchase {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Plan acheté
+  planId        String   // "starter" | "studio" | "business"
+  creditsAdded  Int      // Crédits ajoutés au compte
+
+  // Paiement
+  amount        Float    // Montant payé
+  currency      String   // XOF | EUR | USD
+  stripePaymentId String? @unique // ID paiement Stripe
+  status        PurchaseStatus @default(PENDING)
+
+  // Promotion
+  promoCodeId   String?
+  promoCode     PromoCode? @relation(fields: [promoCodeId], references: [id])
+  discountAmount Float?    // Réduction appliquée
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([userId])
+  @@index([stripePaymentId])
+  @@map("purchases")
+}
+
+enum PurchaseStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+// ============================================================
+// PROMO CODE — Codes influenceurs & promotions
+// ============================================================
+model PromoCode {
+  id            String   @id @default(cuid())
+  code          String   @unique
+  description   String?  // Description interne (ex: "Code influencer Alice")
+
+  // Effet du code (l'un ou l'autre, ou les deux)
+  creditsBonus  Int      @default(0)  // Crédits offerts en bonus
+  discountPct   Int      @default(0)  // % de réduction (0-100)
+
+  // Limites
+  usageLimit    Int      @default(100)
+  usedCount     Int      @default(0)
+  isActive      Boolean  @default(true)
+  expiresAt     DateTime?
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  usages        PromoCodeUsage[]
+  purchases     Purchase[]
+
+  @@map("promo_codes")
+}
+
+// ============================================================
+// PROMO CODE USAGE — Qui a utilisé quel code
+// ============================================================
+model PromoCodeUsage {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  promoCodeId String
+  promoCode   PromoCode @relation(fields: [promoCodeId], references: [id])
+  usedAt      DateTime  @default(now())
+
+  @@unique([userId, promoCodeId]) // Un user ne peut utiliser le même code qu'une seule fois
+  @@map("promo_code_usages")
+}

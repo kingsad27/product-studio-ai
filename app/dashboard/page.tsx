@@ -1,88 +1,169 @@
-import Navbar from "@/components/landing/Navbar";
-import Footer from "@/components/landing/Footer";
-import Link from "next/link";
-import { ROUTES } from "@/constants/routes";
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
+import { db } from "@/lib/db";
 import type { Metadata } from "next";
+import Navbar from "@/components/landing/Navbar";
+import UploadForm from "@/components/dashboard/UploadForm";
+import CreditsBadge from "@/components/dashboard/CreditsBadge";
+import Link from "next/link";
+import { Sparkles, History, ShoppingBag } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Tableau de bord",
-  description: "Gérez vos générations d'images et vos crédits.",
+  title: "Mon Espace | ProductStudio AI",
+  description: "Générez vos photos produit professionnelles.",
 };
 
-export default function DashboardPage() {
-  // Données mock pour le MVP
-  const mockStats = [
-    { label: "Crédits disponibles", value: "0", icon: "💎" },
-    { label: "Images générées", value: "0", icon: "🖼️" },
-    { label: "Produits uploadés", value: "0", icon: "📦" },
-  ];
+export default async function DashboardPage() {
+  const { userId } = await auth();
+
+  // Protection server-side (double avec le middleware)
+  if (!userId) redirect("/sign-in");
+
+  // Récupérer l'utilisateur et ses projets récents
+  const user = await db.user.findUnique({
+    where: { id: userId },
+    include: {
+      projects: {
+        orderBy: { createdAt: "desc" },
+        take: 6,
+      },
+    },
+  });
+
+  // Si le user n'est pas encore en DB (webhook pas encore déclenché), on crée à la volée
+  const currentUser = user ?? await db.user.upsert({
+    where: { id: userId },
+    update: {},
+    create: { id: userId, email: "", credits: 1 },
+  });
+
+  const credits = currentUser.credits;
+  const recentProjects = currentUser.projects ?? [];
+  const totalGenerated = recentProjects.reduce(
+    (sum, p) => sum + (p.outputImageCount ?? 0), 0
+  );
 
   return (
     <>
       <Navbar />
-      <main className="min-h-screen pt-24 pb-16 px-4">
+      <main className="min-h-screen bg-gradient-to-b from-slate-50 to-white pt-24 pb-20 px-4">
         <div className="mx-auto max-w-5xl">
+
           {/* En-tête */}
-          <div className="mb-10">
-            <h1 className="text-3xl font-extrabold text-[var(--foreground)] mb-2">
-              Tableau de bord
-            </h1>
-            <p className="text-[var(--muted-foreground)]">
-              Bienvenue ! Gérez vos crédits et vos générations d&apos;images ici.
-            </p>
+          <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-extrabold text-slate-900 mb-1">Mon Espace</h1>
+              <p className="text-slate-500 text-sm">Transformez vos photos en visuels professionnels</p>
+            </div>
+            <CreditsBadge credits={credits} />
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
-            {mockStats.map((stat, i) => (
-              <div
-                key={i}
-                className="flex items-center gap-4 p-6 rounded-2xl border border-[var(--border)] bg-[var(--background)]"
-              >
-                <span className="text-3xl">{stat.icon}</span>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10">
+            {[
+              { label: "Crédits", value: credits, icon: "💎", color: "bg-violet-50 border-violet-100" },
+              { label: "Sessions", value: recentProjects.length, icon: "📸", color: "bg-blue-50 border-blue-100" },
+              { label: "Photos générées", value: totalGenerated, icon: "🖼️", color: "bg-emerald-50 border-emerald-100" },
+              { label: "Retouches gratuites", value: `${recentProjects.filter(p => p.regenerationsUsed < p.regenerationsMax).length}`, icon: "✨", color: "bg-orange-50 border-orange-100" },
+            ].map((stat, i) => (
+              <div key={i} className={`flex items-center gap-3 p-5 rounded-2xl border ${stat.color}`}>
+                <span className="text-2xl">{stat.icon}</span>
                 <div>
-                  <p className="text-2xl font-black text-[var(--foreground)]">{stat.value}</p>
-                  <p className="text-sm text-[var(--muted-foreground)]">{stat.label}</p>
+                  <p className="text-2xl font-black text-slate-900">{stat.value}</p>
+                  <p className="text-xs text-slate-500">{stat.label}</p>
                 </div>
               </div>
             ))}
           </div>
 
-          {/* Actions rapides */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Link
-              href={ROUTES.UPLOAD}
-              className="flex flex-col items-center justify-center gap-3 p-8 rounded-2xl border-2 border-dashed border-[var(--brand-300)] bg-[var(--brand-50)] hover:border-[var(--brand-500)] hover:bg-[var(--brand-100)] transition-all duration-200 text-center group"
-            >
-              <span className="text-4xl group-hover:scale-110 transition-transform duration-200">📸</span>
-              <div>
-                <p className="font-bold text-[var(--brand-700)]">Uploader un produit</p>
-                <p className="text-sm text-[var(--brand-600)]">Commencer une nouvelle génération</p>
-              </div>
-            </Link>
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
 
-            <Link
-              href={ROUTES.PRICING}
-              className="flex flex-col items-center justify-center gap-3 p-8 rounded-2xl border border-[var(--border)] bg-[var(--background)] hover:border-[var(--brand-400)] hover:shadow-md transition-all duration-200 text-center group"
-            >
-              <span className="text-4xl group-hover:scale-110 transition-transform duration-200">💳</span>
-              <div>
-                <p className="font-bold text-[var(--foreground)]">Acheter des crédits</p>
-                <p className="text-sm text-[var(--muted-foreground)]">À partir de 1 000 FCFA</p>
+            {/* Section upload (prioritaire) */}
+            <div className="lg:col-span-3">
+              <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-600 text-white">
+                    <Sparkles size={20} />
+                  </div>
+                  <div>
+                    <h2 className="font-bold text-slate-900">Nouveau shooting</h2>
+                    <p className="text-xs text-slate-500">Jusqu&apos;à 3 photos → 5 visuels pro</p>
+                  </div>
+                  <span className="ml-auto text-xs font-semibold bg-violet-100 text-violet-700 px-3 py-1 rounded-full">
+                    1 crédit
+                  </span>
+                </div>
+                <UploadForm />
               </div>
-            </Link>
-          </div>
+            </div>
 
-          {/* Notice MVP */}
-          <div className="mt-8 p-4 rounded-xl border border-amber-200 bg-amber-50">
-            <p className="text-sm text-amber-700 font-medium">
-              🚧 <strong>Version MVP</strong> — Les fonctionnalités de génération IA seront disponibles prochainement.
-              Créez votre compte pour être parmi les premiers à y accéder.
-            </p>
+            {/* Colonne latérale */}
+            <div className="lg:col-span-2 space-y-4">
+
+              {/* Raccourci recharger */}
+              <Link
+                href="/pricing"
+                className="flex items-center gap-4 rounded-2xl border border-amber-100 bg-gradient-to-r from-amber-50 to-orange-50 p-5 hover:shadow-md transition-all group"
+              >
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500 text-white group-hover:scale-110 transition-transform">
+                  <ShoppingBag size={18} />
+                </div>
+                <div>
+                  <p className="font-bold text-slate-800 text-sm">Acheter des crédits</p>
+                  <p className="text-xs text-slate-500">À partir de 2 250 FCFA</p>
+                </div>
+              </Link>
+
+              {/* Historique récent */}
+              <div className="rounded-2xl border border-slate-200 bg-white p-5">
+                <div className="flex items-center gap-2 mb-4">
+                  <History size={16} className="text-slate-400" />
+                  <h3 className="font-bold text-slate-800 text-sm">Dernières sessions</h3>
+                </div>
+
+                {recentProjects.length === 0 ? (
+                  <div className="text-center py-8 text-slate-400">
+                    <p className="text-3xl mb-2">📷</p>
+                    <p className="text-sm">Aucune session encore</p>
+                    <p className="text-xs">Votre historique apparaîtra ici</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {recentProjects.map((project) => (
+                      <Link
+                        key={project.id}
+                        href={`/dashboard/results/${project.id}`}
+                        className="flex items-center gap-3 rounded-xl p-3 hover:bg-slate-50 transition-colors"
+                      >
+                        <div className={`h-2 w-2 rounded-full ${
+                          project.status === "COMPLETED" ? "bg-green-400" :
+                          project.status === "PROCESSING" ? "bg-yellow-400 animate-pulse" :
+                          project.status === "FAILED" ? "bg-red-400" : "bg-slate-300"
+                        }`} />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-medium text-slate-700 truncate">
+                            Session du {new Date(project.createdAt).toLocaleDateString("fr-FR")}
+                          </p>
+                          <p className="text-xs text-slate-400">
+                            {project.inputImageCount} photo{project.inputImageCount > 1 ? "s" : ""} → {project.outputImageCount} générée{project.outputImageCount > 1 ? "s" : ""}
+                          </p>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Conseil */}
+              <div className="rounded-2xl border border-blue-100 bg-blue-50 p-4">
+                <p className="text-xs text-blue-700 font-medium">
+                  💡 <strong>Astuce :</strong> Combinez jusqu&apos;à 3 articles (haut + bas + chaussures) dans une même session pour maximiser vos crédits !
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </main>
-      <Footer />
     </>
   );
 }
