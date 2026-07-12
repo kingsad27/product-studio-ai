@@ -35,12 +35,18 @@ export default async function DashboardPage() {
     where: { id: userId },
     update: {},
     create: { id: userId, email: "", credits: 1 },
+    include: {
+      projects: {
+        orderBy: { createdAt: "desc" },
+        take: 6,
+      },
+    },
   });
 
   const credits = currentUser.credits;
   const recentProjects = currentUser.projects ?? [];
   const totalGenerated = recentProjects.reduce(
-    (sum, p) => sum + (p.outputImageCount ?? 0), 0
+    (sum: number, p: { outputImageCount: number }) => sum + (p.outputImageCount ?? 0), 0
   );
 
   return (
@@ -64,7 +70,7 @@ export default async function DashboardPage() {
               { label: "Crédits", value: credits, icon: "💎", color: "bg-violet-50 border-violet-100" },
               { label: "Sessions", value: recentProjects.length, icon: "📸", color: "bg-blue-50 border-blue-100" },
               { label: "Photos générées", value: totalGenerated, icon: "🖼️", color: "bg-emerald-50 border-emerald-100" },
-              { label: "Retouches gratuites", value: `${recentProjects.filter(p => p.regenerationsUsed < p.regenerationsMax).length}`, icon: "✨", color: "bg-orange-50 border-orange-100" },
+              { label: "Retouches gratuites", value: `${recentProjects.filter((p: any) => p.regenerationsUsed < p.regenerationsMax).length}`, icon: "✨", color: "bg-orange-50 border-orange-100" },
             ].map((stat, i) => (
               <div key={i} className={`flex items-center gap-3 p-5 rounded-2xl border ${stat.color}`}>
                 <span className="text-2xl">{stat.icon}</span>
@@ -129,7 +135,7 @@ export default async function DashboardPage() {
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    {recentProjects.map((project) => (
+                    {recentProjects.map((project: any) => (
                       <Link
                         key={project.id}
                         href={`/dashboard/results/${project.id}`}

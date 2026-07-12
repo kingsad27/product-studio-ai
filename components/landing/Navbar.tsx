@@ -80,7 +80,7 @@ export default function Navbar() {
                 >
                   Mon Espace
                 </Link>
-                <UserButton afterSignOutUrl="/" />
+                <UserButton />
               </>
             )}
           </div>
@@ -124,7 +124,7 @@ export default function Navbar() {
               <>
                 <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)} className="block p-2 text-base font-medium text-slate-700">Mon Espace</Link>
                 <div className="p-2">
-                  <UserButton afterSignOutUrl="/" />
+                  <UserButton />
                 </div>
               </>
             )}
