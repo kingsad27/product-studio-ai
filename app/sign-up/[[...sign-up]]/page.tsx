@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function SignUpPage() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#FFFCF8] p-4">
+    <main className="flex min-h-screen items-center justify-center bg-slate-50 p-4">
       <SignUp
         forceRedirectUrl="/dashboard"
         signInUrl="/sign-in"

@@ -99,7 +99,7 @@ export default function OnboardingFlow() {
   const step1Valid = data.firstName.trim().length >= 2 && data.phoneNumber.trim().length >= 6;
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-[#FFFCF8] p-4 font-sans text-slate-800">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 p-4 font-sans text-slate-800">
 
       {/* Progress dots */}
       <div className="absolute top-10 flex gap-2">

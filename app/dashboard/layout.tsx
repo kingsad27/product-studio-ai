@@ -20,7 +20,7 @@ export default async function DashboardLayout({
   if (!user.isOnboarded) redirect("/onboarding");
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#FFFCF8]">
+    <div className="flex h-screen overflow-hidden bg-slate-50">
       {/* Sidebar fixe */}
       <Sidebar credits={user.credits} />
 
