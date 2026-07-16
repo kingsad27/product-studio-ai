@@ -30,11 +30,13 @@
 - **Refonte UI Dashboard** : Intégration du nouveau design (style izimelo) pour le tableau de bord :
   - Layout (`app/dashboard/layout.tsx`) avec Sidebar fixe et collapsible.
   - Page d'accueil Dashboard avec bannière CTA dégradée, salutation personnalisée, compteur de statistiques (photos générées, sessions), astuce du jour et liste d'historique optimisée.
+- **Pages Dashboard Secondaires** : Création des pages de contenu et placeholders (`/dashboard/new`, `/dashboard/stats`, `/dashboard/history`) pour rendre la navigation de la nouvelle Sidebar totalement fonctionnelle.
 
 ### Corrigé
 - **API Onboarding & Dashboard** : Remplacement de la méthode `update` par `upsert` pour la création utilisateur lors de l'onboarding. Suppression de la création "fantôme" (email vide) sur le dashboard.
 - **Base de données** : Nettoyage de la table `users` et création de scripts SQL directs (`check.js`, `reset.js`) pour diagnostiquer et supprimer manuellement les utilisateurs tests corrompus via l'adaptateur Prisma `pg`.
 - **Middleware Clerk** : Remplacement de l'API dépréciée `createRouteMatcher` par une fonction manuelle de vérification des routes `isPublicPath` afin d'éviter les avertissements Clerk et les problèmes de routing Next.js.
+- **Configuration Next.js (`next/image`)** : Ajout du domaine `img.clerk.com` aux `remotePatterns` dans `next.config.ts` pour corriger l'erreur de rendu (`Invalid src prop`) de l'avatar utilisateur dans la Sidebar.
 - **Style CSS (Server Components)** : Résolution de l'erreur `client-only` sur le dashboard en déplaçant les animations clés (`@keyframes wave`) du bloc `<style jsx global>` vers le fichier global `app/globals.css`.
 - **Cohérence Visuelle** : Uniformisation de la couleur de fond (`bg-slate-50`) sur les pages d'authentification, d'onboarding et du dashboard pour correspondre exactement à celle de la landing page.
 
