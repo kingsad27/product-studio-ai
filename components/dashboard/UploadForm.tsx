@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Upload, X, Sparkles, ImagePlus, AlertCircle } from "lucide-react";
@@ -17,16 +17,31 @@ export default function UploadForm() {
   const [isDragging, setIsDragging] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showTooltip, setShowTooltip] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
   const MAX_FILES = 3;
   const MAX_SIZE_MB = 10;
 
+  useEffect(() => {
+    // Afficher le tooltip de guide si c'est la première fois, après un petit délai
+    const timer = setTimeout(() => {
+      if (!localStorage.getItem("hasUploadedFirstFile")) {
+        setShowTooltip(true);
+      }
+    }, 4000); // 4s laisse le temps au modal Cadeau de s'afficher d'abord
+    return () => clearTimeout(timer);
+  }, []);
+
   const addFiles = useCallback(
     (newFiles: FileList | null) => {
       if (!newFiles) return;
       setError(null);
+      
+      // Marquer que l'utilisateur a compris
+      setShowTooltip(false);
+      localStorage.setItem("hasUploadedFirstFile", "true");
 
       const validFiles = Array.from(newFiles).filter((file) => {
         if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
@@ -111,27 +126,48 @@ export default function UploadForm() {
   return (
     <div className="space-y-6">
       {/* Zone de dépôt */}
-      <div
-        onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
-        onDragLeave={() => setIsDragging(false)}
-        onDrop={handleDrop}
-        onClick={() => files.length < MAX_FILES && fileInputRef.current?.click()}
-        className={`relative rounded-3xl border-2 border-dashed p-10 text-center transition-all duration-300 cursor-pointer select-none
-          ${isDragging
-            ? "border-violet-500 bg-violet-50 scale-[1.01]"
-            : files.length >= MAX_FILES
-            ? "border-slate-200 bg-slate-50 cursor-not-allowed opacity-60"
-            : "border-slate-300 bg-white hover:border-violet-400 hover:bg-violet-50/40"
-          }`}
-      >
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-          multiple
-          className="hidden"
-          onChange={(e) => addFiles(e.target.files)}
-        />
+      <div className="relative">
+        
+        {/* Tooltip Product Tour */}
+        <AnimatePresence>
+          {showTooltip && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="absolute -top-12 left-1/2 -translate-x-1/2 z-10"
+            >
+              <div className="bg-orange-500 text-white text-sm font-bold px-4 py-2 rounded-full shadow-lg shadow-orange-500/30 flex items-center gap-2 animate-bounce">
+                <span>Commence ici pour créer ton image</span>
+                <span>👇</span>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <div
+          onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+          onDragLeave={() => setIsDragging(false)}
+          onDrop={handleDrop}
+          onClick={() => files.length < MAX_FILES && fileInputRef.current?.click()}
+          className={`relative rounded-3xl border-2 border-dashed p-10 text-center transition-all duration-300 cursor-pointer select-none
+            ${isDragging
+              ? "border-violet-500 bg-violet-50 scale-[1.01]"
+              : files.length >= MAX_FILES
+              ? "border-slate-200 bg-slate-50 cursor-not-allowed opacity-60"
+              : "border-slate-300 bg-white hover:border-violet-400 hover:bg-violet-50/40"
+            }
+            ${showTooltip ? "ring-4 ring-orange-200 border-orange-400" : ""}
+          `}
+        >
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            multiple
+            className="hidden"
+            onChange={(e) => addFiles(e.target.files)}
+          />
 
         <motion.div
           animate={{ scale: isDragging ? 1.1 : 1 }}
@@ -152,6 +188,7 @@ export default function UploadForm() {
           {files.length}/{MAX_FILES} image{files.length > 1 ? "s" : ""} sélectionnée{files.length > 1 ? "s" : ""}
         </p>
       </div>
+    </div>
 
       {/* Aperçus des images */}
       <AnimatePresence>

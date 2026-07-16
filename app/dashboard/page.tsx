@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import Navbar from "@/components/landing/Navbar";
 import UploadForm from "@/components/dashboard/UploadForm";
 import CreditsBadge from "@/components/dashboard/CreditsBadge";
+import WelcomeGiftModal from "@/components/dashboard/WelcomeGiftModal";
 import Link from "next/link";
 import { Sparkles, History, ShoppingBag } from "lucide-react";
 
@@ -13,14 +14,19 @@ export const metadata: Metadata = {
   description: "Générez vos photos produit professionnelles.",
 };
 
-export default async function DashboardPage() {
+interface DashboardPageProps {
+  searchParams: Promise<{ welcome?: string }>;
+}
+
+export default async function DashboardPage({ searchParams }: DashboardPageProps) {
   const { userId } = await auth();
+  const resolvedParams = await searchParams;
 
   // Protection server-side (double avec le middleware)
   if (!userId) redirect("/sign-in");
 
   // Récupérer l'utilisateur et ses projets récents
-  const user = await db.user.findUnique({
+  const currentUser = await db.user.findUnique({
     where: { id: userId },
     include: {
       projects: {
@@ -30,18 +36,18 @@ export default async function DashboardPage() {
     },
   });
 
-  // Si le user n'est pas encore en DB (webhook pas encore déclenché), on crée à la volée
-  const currentUser = user ?? await db.user.upsert({
-    where: { id: userId },
-    update: {},
-    create: { id: userId, email: "", credits: 1 },
-    include: {
-      projects: {
-        orderBy: { createdAt: "desc" },
-        take: 6,
-      },
-    },
-  });
+  // Si l'utilisateur n'est pas encore en DB (webhook Clerk pas encore déclenché)
+  // on le renvoie vers l'onboarding où la création se fera proprement
+  if (!currentUser) {
+    redirect("/onboarding");
+  }
+
+  if (!currentUser.isOnboarded) {
+    redirect("/onboarding");
+  }
+
+  // Détecter si c'est une arrivée post-onboarding pour afficher le cadeau
+  const isNewUser = resolvedParams.welcome === "1";
 
   const credits = currentUser.credits;
   const recentProjects = currentUser.projects ?? [];
@@ -52,6 +58,7 @@ export default async function DashboardPage() {
   return (
     <>
       <Navbar />
+      <WelcomeGiftModal showOnMount={isNewUser} />
       <main className="min-h-screen bg-gradient-to-b from-slate-50 to-white pt-24 pb-20 px-4">
         <div className="mx-auto max-w-5xl">
 
