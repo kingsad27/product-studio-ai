@@ -136,3 +136,18 @@ h1, h2, h3, h4, h5, h6 {
   outline: 2px solid var(--brand-500);
   outline-offset: 2px;
 }
+
+/* ============================================================
+   ANIMATIONS DASHBOARD
+   ============================================================ */
+@keyframes wave {
+  0%, 100% { transform: rotate(0deg); }
+  25%       { transform: rotate(20deg); }
+  75%       { transform: rotate(-10deg); }
+}
+
+.animate-wave {
+  animation: wave 1.8s ease-in-out infinite;
+  display: inline-block;
+  transform-origin: 70% 70%;
+}

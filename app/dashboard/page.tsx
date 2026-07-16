@@ -229,15 +229,6 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
           </div>
         </div>
       </div>
-
-      <style jsx global>{`
-        @keyframes wave {
-          0%, 100% { transform: rotate(0deg); }
-          25% { transform: rotate(20deg); }
-          75% { transform: rotate(-10deg); }
-        }
-        .animate-wave { animation: wave 1.8s ease-in-out infinite; display: inline-block; }
-      `}</style>
     </>
   );
 }
