@@ -1,20 +1,29 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { clerkMiddleware } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
-// Routes publiques : landing + webhooks entrants (pas d'auth requise)
-const isPublicRoute = createRouteMatcher([
+// Routes accessibles sans authentification
+const PUBLIC_PATHS = [
   "/",
+  "/sign-in",
+  "/sign-up",
   "/api/webhook/clerk",
   "/api/webhook/replicate",
-  // Pages Clerk gérées par le SDK (sign-in / sign-up)
-  "/sign-in(.*)",
-  "/sign-up(.*)",
-]);
+];
+
+function isPublicPath(request: NextRequest): boolean {
+  const { pathname } = request.nextUrl;
+  return PUBLIC_PATHS.some(
+    (path) => pathname === path || pathname.startsWith(path + "/")
+  );
+}
 
 export default clerkMiddleware(async (auth, request) => {
-  if (!isPublicRoute(request)) {
+  if (!isPublicPath(request)) {
     // Protège toutes les routes privées : /dashboard, /onboarding, /api/...
     await auth.protect();
   }
+  return NextResponse.next();
 });
 
 export const config = {
