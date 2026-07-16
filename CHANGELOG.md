@@ -22,19 +22,24 @@
 ## [Non publié] - 2026-07-16
 ### Ajouté
 - **Flux d'Onboarding** : Implémentation complète du parcours de bienvenue en 3 étapes (`/onboarding`) :
-  - Étape 1 — Collecte du prénom et du numéro de téléphone avec sélection d'indicatif pays (CI, SN, TG, BF, ML, CM, FR, US).
-  - Étape 2 — Sélection de l'objectif d'utilisation (E-commerce, Réseaux sociaux, Agence, Test).
-  - Étape 3 — Sélection du canal d'acquisition (TikTok, Instagram, Facebook, WhatsApp, Bouche-à-oreille, Google) avec soumission automatique au clic.
-- **Modale Cadeau de Bienvenue** : `WelcomeGiftModal` affichée 1,5 s après l'arrivée sur le dashboard post-onboarding, avec animation rebond, double vague de confettis au clic, et révélation du crédit gratuit.
+  - Étape 1 — Collecte du prénom et du numéro de téléphone avec sélection d'indicatif pays.
+  - Étape 2 — Sélection de l'objectif d'utilisation.
+  - Étape 3 — Sélection du canal d'acquisition avec soumission automatique au clic.
+- **Modale Cadeau de Bienvenue** : `WelcomeGiftModal` affichée 1,5 s après l'arrivée sur le dashboard post-onboarding, avec animation de confettis.
+- **Pages d'Authentification Custom** : Création des pages `app/sign-in` et `app/sign-up` utilisant le SDK Clerk, configurées avec `forceRedirectUrl="/dashboard"` pour supprimer l'écran intermédiaire "Accéder à l'application" de Clerk et fluidifier l'expérience.
+- **Refonte UI Dashboard** : Intégration du nouveau design (style izimelo) pour le tableau de bord :
+  - Layout (`app/dashboard/layout.tsx`) avec Sidebar fixe et collapsible.
+  - Page d'accueil Dashboard avec bannière CTA dégradée, salutation personnalisée, compteur de statistiques (photos générées, sessions), astuce du jour et liste d'historique optimisée.
 
 ### Corrigé
-- **API `/api/user/onboarding`** : Remplacement de `update` par `upsert` pour éviter un crash si le webhook Clerk n'a pas encore créé l'utilisateur en base au moment de la soumission. Ajout de la validation des champs obligatoires et récupération de l'email via `currentUser()` en fallback.
-- **Dashboard (`/dashboard`)** : Suppression de l'upsert inline avec email vide (anti-pattern dangereux). Le dashboard redirige désormais proprement vers `/onboarding` si l'utilisateur n'est pas en base. Transmission du prop `showOnMount` à la `WelcomeGiftModal` via le paramètre d'URL `?welcome=1`.
-- **Middleware** : Ajout de `/sign-in(.*)` et `/sign-up(.*)` comme routes publiques pour éviter les boucles de redirection Clerk.
-- **Indicatif téléphone** : L'indicatif pays est désormais correctement concaténé au numéro (`+225 0707020304`) avant sauvegarde en base.
-- **UX Onboarding** : Ajout d'un état de chargement dédié à l'étape 3, gestion d'erreur API avec bouton « Réessayer », et désactivation du bouton « Continuer » si les champs obligatoires sont vides.
+- **API Onboarding & Dashboard** : Remplacement de la méthode `update` par `upsert` pour la création utilisateur lors de l'onboarding. Suppression de la création "fantôme" (email vide) sur le dashboard.
+- **Base de données** : Nettoyage de la table `users` et création de scripts SQL directs (`check.js`, `reset.js`) pour diagnostiquer et supprimer manuellement les utilisateurs tests corrompus via l'adaptateur Prisma `pg`.
+- **Middleware Clerk** : Remplacement de l'API dépréciée `createRouteMatcher` par une fonction manuelle de vérification des routes `isPublicPath` afin d'éviter les avertissements Clerk et les problèmes de routing Next.js.
+- **Style CSS (Server Components)** : Résolution de l'erreur `client-only` sur le dashboard en déplaçant les animations clés (`@keyframes wave`) du bloc `<style jsx global>` vers le fichier global `app/globals.css`.
+- **Cohérence Visuelle** : Uniformisation de la couleur de fond (`bg-slate-50`) sur les pages d'authentification, d'onboarding et du dashboard pour correspondre exactement à celle de la landing page.
 
-### Prochaines étapes techniques (Étape 5 - Paiement)
-1. **Intégration Stripe / Mobile Money** : Configurer Stripe pour permettre l'achat sécurisé de recharges de crédits selon la devise locale.
-2. **Codes Promo & Influenceurs** : Implémenter le système de codes de promotion pour attribuer des bonus de crédits ou réductions sur les achats.
+### Prochaines étapes techniques (Étape 5 - Déploiement & Paiement)
+1. **Déploiement Vercel** : Déployer l'application et lier les Webhooks de production (Clerk, Replicate).
+2. **Intégration Stripe / Mobile Money** : Permettre l'achat de recharges de crédits selon la devise locale (Wave, Orange Money via intégrateurs).
+3. **Codes Promo & Influenceurs** : Implémenter la logique de codes de promotion pour l'acquisition client.
 
